@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pemilihan Ketua & Wakil OSIS</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    width: 100%;
+    max-width: 900px;
+    padding: 30px;
+    margin: 20px 0;
+  }
+
+  h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 1.8em;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+    font-size: 0.9em;
+  }
+
+  .menu {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+  }
+
+  .menu button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: #f0f0f0;
+    color: #333;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 120px;
+    font-size: 0.95em;
+  }
+
+  .menu button:hover { background: #e0e0e0; transform: translateY(-2px); }
+  .menu button.active { background: #667eea; color: white; }
+
+  .page { display: none; }
+  .page.active { display: block; animation: fadeIn 0.4s; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Kartu Kandidat */
+  .kandidat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  .kandidat-card {
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #fafafa;
+  }
+
+  .kandidat-card:hover {
+    border-color: #667eea;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(102,126,234,0.2);
+  }
+
+  .kandidat-card.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea15, #764ba215);
+    box-shadow: 0 10px 25px rgba(102,126,234,0.3);
+  }
+
+  .nomor {
+    display: inline-block;
+    width: 42px;
+    height: 42px;
+    line-height: 42px;
+    border-radius: 50%;
+    background: #667eea;
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 12px;
+  }
+
+  .kandidat-card.selected .nomor {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scale(1.1);
+  }
+
+  /* Foto calon */
+  .foto-container {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .foto-wrapper {
+    flex: 1;
+    max-width: 100px;
+  }
+
+  .foto-calon {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 3px solid #e0e0e0;
+    transition: all 0.3s;
+    background: #f0f0f0;
+    display: block;
+  }
+
+  .kandidat-card:hover .foto-calon { border-color: #667eea; }
+  .kandidat-card.selected .foto-calon {
+    border-color: #667eea;
+    box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+  }
+
+  .foto-placeholder {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    border: 3px dashed #ccc;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;
+    color: #bbb;
+  }
+
+  .label-foto {
+    font-size: 0.7em;
+    color: #666;
+    text-align: center;
+    margin-top: 5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .nama-ketua { font-weight: 700; color: #333; font-size: 1.05em; }
+  .nama-wakil { color: #666; font-size: 0.88em; margin-top: 3px; }
+  .visi {
+    font-size: 0.78em;
+    color: #888;
+    margin-top: 10px;
+    font-style: italic;
+    padding-top: 10px;
+    border-top: 1px dashed #ddd;
+    line-height: 1.4;
+  }
+
+  .input-group { margin: 15px 0; }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #444;
+    font-size: 0.9em;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 1em;
+    transition: border 0.3s;
+  }
+
+  .input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+  }
+
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(102,126,234,0.4); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .btn-danger { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+
+  /* Hasil */
+  .hasil-item {
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 12px;
+    background: #f9f9f9;
+    border-left: 5px solid #667eea;
+  }
+
+  .hasil-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .hasil-nama-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .hasil-foto {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #667eea;
+    flex-shrink: 0;
+    background: #eee;
+  }
+
+  .hasil-foto-placeholder {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px dashed #ccc;
+    background: #f9f9f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    color: #bbb;
+    flex-shrink: 0;
+  }
+
+  .hasil-nama { font-weight: 700; color: #333; font-size: 0.95em; }
+  .hasil-suara { font-weight: 600; color: #667eea; font-size: 0.9em; }
+
+  .bar-container {
+    background: #e0e0e0;
+    border-radius: 10px;
+    height: 25px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 10px;
+    transition: width 1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-weight: 600;
+    font-size: 0.85em;
+    min-width: 40px;
+  }
+
+  .total-suara {
+    text-align: center;
+    padding: 15px;
+    background: #f0f4ff;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-weight: 600;
+    color: #444;
+  }
+
+  .pemenang {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    margin-top: 20px;
+    box-shadow: 0 10px 25px rgba(255,215,0,0.3);
+  }
+
+  .foto-pemenang {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    margin: 0 auto 12px;
+    display: block;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+
+  .pemenang h2 { color: #333; margin-bottom: 10px; }
+  .pemenang p { color: #555; margin: 4px 0; }
+
+  .alert {
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    font-weight: 500;
+    text-align: center;
+    animation: fadeIn 0.3s;
+  }
+
+  .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+
+  .admin-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .admin-actions .btn { flex: 1; min-width: 150px; }
+
+  .admin-note {
+    margin-top: 15px;
+    font-size: 0.85em;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 500px) {
+    h1 { font-size: 1.4em; }
+    .container { padding: 20px; }
+    .kandidat-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🗳️ Pemilihan Ketua & Wakil OSIS</h1>
+  <p class="subtitle">Pilih pemimpinmu dengan bijak!</p>
+
+  <div class="menu">
+    <button id="btn-voting" class="active" onclick="showPage('voting')">Voting</button>
+    <button id="btn-hasil" onclick="showPage('hasil')">Hasil</button>
+    <button id="btn-admin" onclick="showPage('admin')">Admin</button>
+  </div>
+
+  <!-- HALAMAN VOTING -->
+  <div id="page-voting" class="page active">
+    <div id="voting-alert"></div>
+
+    <div class="input-group">
+      <label for="nis">NIS/NISN (untuk mencegah voting ganda)</label>
+      <input type="text" id="nis" placeholder="Masukkan NIS/NISN Anda">
+    </div>
+
+    <p style="margin-bottom:12px; font-weight:600; color:#444;">Pilih Kandidat:</p>
+    <div class="kandidat-grid" id="kandidat-grid"></div>
+
+    <button class="btn" onclick="submitVote()">Kirim Suara</button>
+  </div>
+
+  <!-- HALAMAN HASIL -->
+  <div id="page-hasil" class="page">
+    <div id="hasil-content"></div>
+  </div>
+
+  <!-- HALAMAN ADMIN -->
+  <div id="page-admin" class="page">
+    <div class="input-group">
+      <label for="admin-pass">Password Admin</label>
+      <input type="password" id="admin-pass" placeholder="Masukkan password">
+    </div>
+    <button class="btn" onclick="loginAdmin()">Login</button>
+
+    <div id="admin-content" style="margin-top:20px;"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   KONFIGURASI KANDIDAT
+   ------------------------------------------------------------
+   - fotoKetua / fotoWakil: isi dengan nama file di folder "foto/"
+   - Kalau belum punya foto, KOSONGKAN ("") -> akan muncul ikon 👤
+   ============================================================ */
+const KANDIDAT = [
+  {
+    no: 1,
+    ketua: "DENIS PUTRA PRATAMA",
+    wakil: "CITRA ANGGRAENI",
+    visi: "Menjadikan OSIS sebagai wadah bagi seluruh siswa untuk berkembang, berprestasi, disiplin, serta menciptakan lingkungan sekolah yang aktif, kreatif, dan nyaman",
+    fotoKetua: "foto/1._KETUA__DENNIS_PUTRA_PRATAMA.png",
+    fotoWakil: "foto/1.CITRA_ANGGRAEN.png"
+  },
+  {
+    no: 2,
+    ketua: "CHALIZTA HASTA PRAYOGA",
+    wakil: "TRI ANISA RESTU",
+    visi: "Menjadikan OSIS sebagai organisasi yang aktif, inovatif, inspiratif, dan peduli untuk menciptakan lingkungan sekolah yang aman, nyaman, dan berprestasi bagi seluruh siswa",
+    fotoKetua: "foto/2.KETUA_CHALIZTA_HASTA_PRAYOGA.png",
+    fotoWakil: "foto/2._TRI_ANISA_RESTU.png"
+  },
+  {
+    no: 3,
+    ketua: "3.KETUA SYIFA NAULI AZZAHRA",
+    wakil: "KEYSA SILVIANITA",
+    visi: "Menjadikan OSIS sebagai organisasi yang aktif, kreatif, inovatif, dan inspiratif, yang mampu menjadi wadah bagi seluruh siswa untuk mengembangkan bakat, menyalurkan aspirasi, meningkatkan prestasi, serta membentuk karakter yang disiplin, bertanggung jawab, peduli terhadap sesama, dan bangga terhadap sekolah",
+    fotoKetua: "foto/3.KETUA_SYIFA_NAULI_AZZAHRA.png",
+    fotoWakil: "foto/3__KEYSA_SILVIANITA.png"
+  }
+];
+
+const ADMIN_PASSWORD = "admin123"; // Ganti password sesuai keinginan
+
+/* ============================================================
+   LOGIKA APLIKASI (tidak perlu diubah)
+   ============================================================ */
+let selectedKandidat = null;
+let isAdmin = false;
+
+const Storage = {
+  get(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || null; }
+    catch { return null; }
+  },
+  set(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+};
+
+function initData() {
+  if (!Storage.get('suara')) {
+    const awal = {};
+    KANDIDAT.forEach(k => awal[k.no] = 0);
+    Storage.set('suara', awal);
+  }
+  if (!Storage.get('sudahVoting')) Storage.set('sudahVoting', {});
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.menu button').forEach(b => b.classList.remove('active'));
+
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('btn-' + page).classList.add('active');
+
+  if (page === 'hasil') renderHasil();
+  if (page === 'voting') renderKandidat();
+}
+
+/* Cek keberadaan gambar, kalau error pakai placeholder */
+function fotoAtauPlaceholder(src, alt) {
+  if (!src) return '<div class="foto-placeholder">👤</div>';
+  return `<img src="${src}" alt="${alt}" class="foto-calon"
+    onerror="this.outerHTML='<div class=\\'foto-placeholder\\'>👤</div>'">`;
+}
+
+function renderKandidat() {
+  const grid = document.getElementById('kandidat-grid');
+  grid.innerHTML = '';
+  KANDIDAT.forEach(k => {
+    const card = document.createElement('div');
+    card.className = 'kandidat-card' + (selectedKandidat === k.no ? ' selected' : '');
+    card.onclick = () => selectKandidat(k.no);
+
+    card.innerHTML = `
+      <div class="nomor">${k.no}</div>
+      <div class="foto-container">
+        <div class="foto-wrapper">
+          ${fotoAtauPlaceholder(k.fotoKetua, k.ketua)}
+          <div class="label-foto">Ketua</div>
+        </div>
+        <div class="foto-wrapper">
+          ${fotoAtauPlaceholder(k.fotoWakil, k.wakil)}
+          <div class="label-foto">Wakil</div>
+        </div>
+      </div>
+      <div class="nama-ketua">${k.ketua}</div>
+      <div class="nama-wakil">Wakil: ${k.wakil}</div>
+      <div class="visi">"${k.visi}"</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function selectKandidat(no) {
+  selectedKandidat = no;
+  renderKandidat();
+}
+
+function showAlert(msg, type = 'info', targetId = 'voting-alert') {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => { el.innerHTML = ''; }, 4000);
+}
+
+function submitVote() {
+  const nis = document.getElementById('nis').value.trim();
+
+  if (!nis) return showAlert('❌ NIS/NISN tidak boleh kosong!', 'error');
+  if (!selectedKandidat) return showAlert('❌ Silakan pilih kandidat terlebih dahulu!', 'error');
+
+  const sudahVoting = Storage.get('sudahVoting') || {};
+  if (sudahVoting[nis]) {
+    const tgl = new Date(sudahVoting[nis].waktu).toLocaleString('id-ID');
+    return showAlert(`❌ NIS ${nis} sudah melakukan voting pada ${tgl}!`, 'error');
+  }
+
+  const suara = Storage.get('suara');
+  suara[selectedKandidat] = (suara[selectedKandidat] || 0) + 1;
+  Storage.set('suara', suara);
+
+  sudahVoting[nis] = {
+    pilihan: selectedKandidat,
+    waktu: new Date().toISOString()
+  };
+  Storage.set('sudahVoting', sudahVoting);
+
+  const k = KANDIDAT.find(x => x.no === selectedKandidat);
+  showAlert(`✅ Terima kasih! Anda memilih No. ${k.no} - ${k.ketua} & ${k.wakil}`, 'success');
+
+  document.getElementById('nis').value = '';
+  selectedKandidat = null;
+  renderKandidat();
+}
+
+function renderHasil() {
+  const suara = Storage.get('suara') || {};
+  const total = Object.values(suara).reduce((a, b) => a + b, 0);
+  const content = document.getElementById('hasil-content');
+
+  if (total === 0) {
+    content.innerHTML = '<div class="alert alert-info">⚠️ Belum ada suara yang masuk.</div>';
+    return;
+  }
+
+  const hasilUrut = KANDIDAT
+    .map(k => ({ ...k, suara: suara[k.no] || 0 }))
+    .sort((a, b) => b.suara - a.suara);
+
+  let html = `<div class="total-suara">📊 Total Suara Masuk: ${total}</div>`;
+
+  hasilUrut.forEach((k, i) => {
+    const persen = (k.suara / total * 100);
+    const medali = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '  ';
+    const fotoHTML = k.fotoKetua
+      ? `<img src="${k.fotoKetua}" class="hasil-foto"
+           onerror="this.outerHTML='<div class=\\'hasil-foto-placeholder\\'>👤</div>'">`
+      : `<div class="hasil-foto-placeholder">👤</div>`;
+
+    html += `
+      <div class="hasil-item">
+        <div class="hasil-header">
+          <div class="hasil-nama-wrap">
+            ${fotoHTML}
+            <span class="hasil-nama">
+              ${medali} No. ${k.no} - ${k.ketua} & ${k.wakil}
+            </span>
+          </div>
+          <span class="hasil-suara">${k.suara} suara (${persen.toFixed(1)}%)</span>
+        </div>
+        <div class="bar-container">
+          <div class="bar" style="width: ${persen}%">
+            ${persen >= 10 ? persen.toFixed(0) + '%' : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  if (total > 0) {
+    const pemenang = hasilUrut[0];
+    const fotoPemenang = pemenang.fotoKetua
+      ? `<img src="${pemenang.fotoKetua}" class="foto-pemenang"
+           onerror="this.style.display='none'">`
+      : '';
+
+    html += `
+      <div class="pemenang">
+        <h2>🏆 PEMENANG</h2>
+        ${fotoPemenang}
+        <p><strong>No. ${pemenang.no}</strong></p>
+        <p>Ketua: <strong>${pemenang.ketua}</strong></p>
+        <p>Wakil: <strong>${pemenang.wakil}</strong></p>
+        <p style="margin-top:8px;">Dengan ${pemenang.suara} suara (${(pemenang.suara/total*100).toFixed(1)}%)</p>
+      </div>
+    `;
+  }
+
+  content.innerHTML = html;
+}
+
+function loginAdmin() {
+  const pass = document.getElementById('admin-pass').value;
+  if (pass === ADMIN_PASSWORD) {
+    isAdmin = true;
+    renderAdmin();
+  } else {
+    document.getElementById('admin-content').innerHTML =
+      '<div class="alert alert-error">❌ Password salah!</div>';
+  }
+}
+
+function renderAdmin() {
+  if (!isAdmin) return;
+  const sudahVoting = Storage.get('sudahVoting') || {};
+  const suara = Storage.get('suara') || {};
+  const jumlahVoter = Object.keys(sudahVoting).length;
+  const totalSuara = Object.values(suara).reduce((a, b) => a + b, 0);
+
+  document.getElementById('admin-content').innerHTML = `
+    <div class="alert alert-success">✅ Login berhasil sebagai Admin</div>
+    <div class="total-suara">
+      👥 Jumlah pemilih: ${jumlahVoter} orang<br>
+      📊 Total suara: ${totalSuara}
+    </div>
+    <div class="admin-actions">
+      <button class="btn btn-danger" onclick="resetSuara()">🗑️ Reset Semua Suara</button>
+    </div>
+    <p class="admin-note">
+      Catatan: Data disimpan di localStorage browser ini.
+      Untuk hasil yang tersinkron antar perangkat, diperlukan server/database.
+    </p>
+  `;
+}
+
+function resetSuara() {
+  if (!confirm('⚠️ Yakin ingin menghapus SEMUA suara? Tindakan ini tidak bisa dibatalkan!')) return;
+  const awal = {};
+  KANDIDAT.forEach(k => awal[k.no] = 0);
+  Storage.set('suara', awal);
+  Storage.set('sudahVoting', {});
+  alert('✅ Data berhasil direset!');
+  renderAdmin();
+}
+
+// Inisialisasi
+initData();
+renderKandidat();
+</script>
+</body>
+</html>
